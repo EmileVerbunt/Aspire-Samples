@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="13.3.5" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>fc568ce6-59c8-441c-94fc-172686acbd0f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OilGasFoundryDemo.Agents\OilGasFoundryDemo.Agents.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\OilGasFoundryDemo.ApiService\OilGasFoundryDemo.ApiService.csproj" />
+    <ProjectReference Include="..\OilGasFoundryDemo.Web\OilGasFoundryDemo.Web.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.3.5" />
+    <PackageReference Include="Aspire.Hosting.Foundry" Version="13.3.5-preview.1.26270.6" />
+  </ItemGroup>
+
+</Project>

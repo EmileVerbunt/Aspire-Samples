@@ -1,0 +1,120 @@
+@page "/agents"
+@rendermode InteractiveServer
+
+@inject OilGasDemoApiClient DemoApi
+
+<PageTitle>Oil &amp; Gas Agents</PageTitle>
+
+<h1>Oil &amp; Gas Agents</h1>
+
+@if (agents is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h2>Examples</h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+        @foreach (var agent in agents)
+        {
+            <FluentButton Appearance="Appearance.Neutral" OnClick="@(() => UseExample(agent))">
+                @agent.DisplayName
+            </FluentButton>
+        }
+    </div>
+
+    <div style="margin-bottom: 0.75rem;">
+        <FluentSelect TOption="OilGasAgentProfile"
+                      Items="@agents.ToList()"
+                      OptionText="@(a => a.DisplayName)"
+                      OptionValue="@(a => a.Name)"
+                      Value="@selectedAgentName"
+                      ValueChanged="OnAgentSelected"
+                      Label="Agent" />
+    </div>
+
+    <textarea @bind="prompt" rows="6" style="width: 100%; max-width: 900px;"></textarea>
+    <div style="margin-top: 0.75rem;">
+        <FluentButton Appearance="Appearance.Accent" OnClick="InvokeAgentAsync" Disabled="@isInvoking">
+            @(isInvoking ? "Invoking..." : "Invoke agent")
+        </FluentButton>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(invocationError))
+    {
+        <FluentMessageBar Intent="MessageIntent.Error" Style="margin-top: 1rem;">
+            @invocationError
+        </FluentMessageBar>
+    }
+
+    @if (agentResponse is not null)
+    {
+        <FluentCard Style="margin-top: 1rem; max-width: 900px;">
+            <h3>@SelectedAgentDisplayName</h3>
+            <pre style="white-space: pre-wrap;">@agentResponse.Text</pre>
+            <details>
+                <summary>Trace metadata</summary>
+                <p><strong>Agent:</strong> @agentResponse.AgentName</p>
+                <p><strong>Agent ID:</strong> @agentResponse.AgentId</p>
+                <p><strong>Conversation ID:</strong> @agentResponse.ConversationId</p>
+                <p><strong>Response ID:</strong> @agentResponse.ResponseId</p>
+            </details>
+        </FluentCard>
+    }
+}
+
+@code {
+    private IQueryable<OilGasAgentProfile>? agents;
+    private string selectedAgentName = "reservoir-engineer";
+    private string prompt = "Water cut is rising in producer P-17 while nearby injector pressure is stable. What surveillance and optimization steps should we prioritize?";
+    private PromptAgentResponse? agentResponse;
+    private string? invocationError;
+    private bool isInvoking;
+    private string SelectedAgentDisplayName => agents?.FirstOrDefault(a => a.Name == selectedAgentName)?.DisplayName ?? selectedAgentName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        agents = await DemoApi.GetAgentsAsync();
+    }
+
+    private void OnAgentSelected(string? name)
+    {
+        selectedAgentName = name ?? "reservoir-engineer";
+        agentResponse = null;
+        invocationError = null;
+
+        var profile = agents?.FirstOrDefault(a => a.Name == selectedAgentName);
+        if (profile is not null)
+        {
+            prompt = profile.SamplePrompt;
+        }
+    }
+
+    private void UseExample(OilGasAgentProfile agent)
+    {
+        selectedAgentName = agent.Name;
+        prompt = agent.SamplePrompt;
+        agentResponse = null;
+        invocationError = null;
+    }
+
+    private async Task InvokeAgentAsync()
+    {
+        isInvoking = true;
+        invocationError = null;
+        agentResponse = null;
+
+        try
+        {
+            agentResponse = await DemoApi.InvokeAgentAsync(selectedAgentName, prompt);
+        }
+        catch (Exception ex)
+        {
+            invocationError = ex.Message;
+        }
+        finally
+        {
+            isInvoking = false;
+        }
+    }
+}
