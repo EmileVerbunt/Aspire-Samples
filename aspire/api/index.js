@@ -442,8 +442,10 @@ app.get('/tasks', (req, res) => {
         return res.status(400).json({ error });
     }
 
+    // ISO 8601 timestamps sort correctly via string comparison, avoiding
+    // 2×n×log(n) Date object allocations per request.
     const allTasks = Array.from(tasks.values()).sort((a, b) =>
-        new Date(b.createdAt) - new Date(a.createdAt)
+        b.createdAt < a.createdAt ? -1 : b.createdAt > a.createdAt ? 1 : 0
     ).slice(0, limit);
 
     res.set('X-Total-Count', String(tasks.size));
