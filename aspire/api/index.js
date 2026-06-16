@@ -2,6 +2,7 @@
 import './instrumentation.js';
 
 import express from 'express';
+import compression from 'compression';
 import amqp from 'amqplib';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -21,6 +22,7 @@ const DEFAULT_TASK_LIST_LIMIT = 100;
 const MAX_TASK_LIST_LIMIT = 500;
 const SUPPORTED_TASK_TYPES = new Set(['analyze', 'report']);
 
+app.use(compression());
 app.use(express.json({ limit: JSON_BODY_LIMIT }));
 app.use((error, req, res, next) => {
     if (error.type === 'entity.too.large') {

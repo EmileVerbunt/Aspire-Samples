@@ -10,6 +10,7 @@
   "dependencies": {
     "express": "^5.2.1",
     "amqplib": "^2.0.1",
+    "compression": "^1.8.0",
     "cors": "^2.8.6",
     "@opentelemetry/sdk-node": "^0.218.0",
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.218.0",
